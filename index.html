@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create and share custom memes by uploading your own images and adding text overlays.">
+  <meta property="og:title" content="Meme Maker">
+  <meta property="og:description" content="Create and share custom memes by uploading your own images and adding text overlays.">
+  <meta property="og:type" content="website">
+  <title>Meme Maker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0b; color: #e4e4e7; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .container { max-width: 800px; width: 100%; padding: 24px; margin: 0 auto; }
+    h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; 
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #a1a1aa; font-size: 1.1rem; margin-bottom: 32px; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+    button { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;
+      border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem;
+      cursor: pointer; transition: all 0.2s; font-weight: 500; }
+    button:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+    input, textarea, select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+      color: #e4e4e7; padding: 12px 16px; border-radius: 8px; font-size: 1rem; width: 100%;
+      outline: none; transition: border-color 0.2s; }
+    input:focus, textarea:focus { border-color: #3b82f6; }
+    .footer { margin-top: auto; padding: 24px; text-align: center; color: #52525b; font-size: 0.85rem; }
+    @media (max-width: 640px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Meme Maker</h1>
+    <p class="subtitle">Create and share custom memes by uploading your own images and adding text overlays.</p>
+  </header>
+  <main class="container">
+    <div class="card">
+      <input type="file" id="image-input" accept="image/*">
+      <canvas id="meme-canvas" width="400" height="300"></canvas>
+      <input type="text" id="text-input" placeholder="Enter text">
+      <select id="font-select">
+        <option value="Arial">Arial</option>
+        <option value="Comic Sans MS">Comic Sans MS</option>
+        <option value="Impact">Impact</option>
+      </select>
+      <input type="color" id="color-input" value="#ffffff">
+      <input type="range" id="size-input" min="12" max="48" value="24">
+      <button id="download-button">Download Meme</button>
+    </div>
+  </main>
+  <footer class="footer">
+    Built with ❤️ by AI App Factory
+  </footer>
+  <script>
+    let imageInput = document.getElementById('image-input');
+    let memeCanvas = document.getElementById('meme-canvas');
+    let textInput = document.getElementById('text-input');
+    let fontSelect = document.getElementById('font-select');
+    let colorInput = document.getElementById('color-input');
+    let sizeInput = document.getElementById('size-input');
+    let downloadButton = document.getElementById('download-button');
+    let ctx = memeCanvas.getContext('2d');
+    let image = null;
+
+    imageInput.addEventListener('change', (e) => {
+      let file = e.target.files[0];
+      let reader = new FileReader();
+      reader.onload = () => {
+        image = new Image();
+        image.onload = () => {
+          memeCanvas.width = image.width;
+          memeCanvas.height = image.height;
+          ctx.drawImage(image, 0, 0);
+          renderText();
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    textInput.addEventListener('input', renderText);
+    fontSelect.addEventListener('change', renderText);
+    colorInput.addEventListener('input', renderText);
+    sizeInput.addEventListener('input', renderText);
+
+    function renderText() {
+      if (image) {
+        ctx.clearRect(0, 0, memeCanvas.width, memeCanvas.height);
+        ctx.drawImage(image, 0, 0);
+        ctx.font = `${sizeInput.value}px ${fontSelect.value}`;
+        ctx.fillStyle = colorInput.value;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(textInput.value, memeCanvas.width / 2, memeCanvas.height / 2);
+      }
+    }
+
+    downloadButton.addEventListener('click', () => {
+      try {
+        let dataURL = memeCanvas.toDataURL();
+        let a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'meme.png';
+        a.click();
+      } catch (e) {
+        alert('Error downloading meme: ' + e.message);
+      }
+    });
+  </script>
+</body>
+</html>
